@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seinco — An AI-Powered Security Companion for Your Desktop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   SEINCO — CONFIG
+   Set GITHUB_REPO in the <script> below (owner/repo) to pull the
+   Download page's version history straight from GitHub Releases.
+   Publishing a version = pushing a GitHub release with the .exe
+   attached. There is no on-page "add version" control for visitors
+   — the only way to add a version is a GitHub release, and the
+   only way to change what repo it reads is editing this file.
+   ============================================================ */
+:root{
+  --bg-deep:#050b08;
+  --purple:#a855f7;
+  --purple-soft:#c084fc;
+  --purple-glow:rgba(168,85,247,.35);
+  --green-tint:#5eead4;
+  --ink:#eafff2;
+  --ink-dim:#9fb3a8;
+  --ink-faint:#6b8177;
+  --line:rgba(168,85,247,.16);
+  --line-soft:rgba(255,255,255,.08);
+  --metal-hi:rgba(255,255,255,.55);
+  --metal-mid:rgba(255,255,255,.14);
+  --metal-lo:rgba(0,0,0,.35);
+  --danger:#f87171;
+  --radius-pill:999px;
+  --radius:20px;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;} }
+
+body{
+  background:
+    radial-gradient(1200px 600px at 12% -10%, rgba(168,85,247,.11), transparent 60%),
+    radial-gradient(900px 500px at 92% 8%, rgba(94,234,212,.06), transparent 55%),
+    repeating-linear-gradient(115deg, rgba(255,255,255,.014) 0px, rgba(255,255,255,.014) 1px, transparent 1px, transparent 5px),
+    radial-gradient(1400px 900px at 50% 0%, #0b1712 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg-deep) 0%, #071009 40%, var(--bg-deep) 100%);
+  color:var(--ink);
+  font-family:var(--font-body);
+  line-height:1.6;
+  min-height:100vh;
+  position:relative;
+}
+/* matte brushed-metal finish: fine directional grain + soft sheen bands, low contrast on purpose (matte, not glossy) */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.045;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background:
+    linear-gradient(100deg, transparent 0%, rgba(255,255,255,.025) 30%, transparent 45%, rgba(255,255,255,.015) 60%, transparent 80%),
+    radial-gradient(ellipse 900px 500px at 50% 100%, rgba(0,0,0,.35), transparent 70%);
+}
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;display:block;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;letter-spacing:-0.01em;}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--purple-soft);display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;}
+.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--purple);box-shadow:0 0 8px var(--purple);}
+.section{padding:88px 0;position:relative;}
+.section-head{max-width:640px;margin-bottom:44px;}
+.section-head h2{font-size:clamp(26px,3.4vw,38px);margin-bottom:14px;}
+.section-head p{color:var(--ink-dim);font-size:16px;}
+.page{display:none;}
+.page.active{display:block;}
+
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--purple-soft);outline-offset:3px;border-radius:8px;
+}
+.skip-link{position:absolute;left:-999px;top:0;background:var(--purple);color:#fff;padding:10px 18px;border-radius:0 0 10px 0;z-index:999;}
+.skip-link:focus{left:0;}
+
+/* ---------- liquid glass panel ---------- */
+.panel{
+  background:linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.015) 60%);
+  border:1px solid var(--line-soft);
+  border-radius:var(--radius);
+  backdrop-filter:blur(18px) saturate(150%);
+  -webkit-backdrop-filter:blur(18px) saturate(150%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 24px 60px -30px rgba(0,0,0,.65);
+  position:relative;
+}
+
+/* ---------- signature: liquid-metal gradient-ring wrapper ---------- */
+.metal-ring{
+  position:relative;border-radius:calc(var(--radius) + 2px);padding:1.5px;
+  background:conic-gradient(from 180deg, rgba(255,255,255,.65), rgba(168,85,247,.55) 20%, rgba(255,255,255,.08) 45%, rgba(94,234,212,.4) 65%, rgba(255,255,255,.5) 100%);
+}
+.metal-ring > .panel{border-radius:var(--radius);border:none;}
+
+/* ---------- pill buttons (accessible, metallic/glass) ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-body);font-weight:600;font-size:14.5px;
+  padding:13px 26px;border-radius:var(--radius-pill);
+  border:1px solid transparent;cursor:pointer;position:relative;overflow:hidden;
+  transition:transform .15s ease, box-shadow .15s ease;
+  white-space:nowrap;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{
+  background:linear-gradient(180deg,#cdb0fb 0%, var(--purple) 40%, #7c3aed 100%);
+  color:#fff;border-color:rgba(255,255,255,.4);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.6), inset 0 -6px 12px rgba(0,0,0,.25), 0 10px 30px -8px var(--purple-glow);
+}
+.btn-primary:hover{box-shadow:inset 0 1px 1px rgba(255,255,255,.7), inset 0 -6px 12px rgba(0,0,0,.25), 0 12px 36px -6px var(--purple-glow);transform:translateY(-1px);}
+.btn-ghost{
+  background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.02) 45%, rgba(0,0,0,.1));
+  border-color:rgba(255,255,255,.22);color:var(--ink);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3), inset 0 -4px 8px rgba(0,0,0,.2);
+  backdrop-filter:blur(10px);
+}
+.btn-ghost:hover{border-color:rgba(255,255,255,.4);background:linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.03) 45%, rgba(0,0,0,.1));}
+.btn-sm{padding:9px 18px;font-size:13px;}
+.btn[disabled]{opacity:.5;cursor:not-allowed;}
+
+/* pills / badges */
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11.5px;letter-spacing:.04em;padding:5px 13px;border-radius:var(--radius-pill);border:1px solid var(--line);background:rgba(168,85,247,.08);color:var(--purple-soft);}
+.pill.live{border-color:rgba(94,234,212,.32);background:rgba(94,234,212,.08);color:var(--green-tint);}
+.pill.roadmap{border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--ink-faint);}
+
+/* ---------- header / nav ---------- */
+header{position:sticky;top:0;z-index:50;backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);background:rgba(5,11,8,.66);border-bottom:1px solid var(--line-soft);}
+nav{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;max-width:1180px;margin:0 auto;gap:16px;}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;font-size:17px;}
+.brand .shield-mark{width:28px;height:28px;}
+.navlinks{display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.045);border:1px solid var(--line-soft);border-radius:var(--radius-pill);padding:5px;backdrop-filter:blur(14px);}
+.navlinks a{font-size:13.5px;color:var(--ink-dim);padding:8px 15px;border-radius:var(--radius-pill);transition:.15s;}
+.navlinks a:hover{color:var(--ink);background:rgba(168,85,247,.09);}
+.navlinks a.active{color:#fff;background:linear-gradient(180deg,#cdb0fb,var(--purple));box-shadow:inset 0 1px 1px rgba(255,255,255,.5);}
+.navcta{display:flex;gap:10px;align-items:center;}
+.navburger{display:none;background:rgba(255,255,255,.06);border:1px solid var(--line-soft);color:var(--ink);font-size:19px;cursor:pointer;width:40px;height:40px;border-radius:50%;align-items:center;justify-content:center;}
+@media(max-width:900px){
+  .navlinks{position:fixed;top:70px;left:16px;right:16px;flex-direction:column;align-items:stretch;gap:4px;background:rgba(8,16,12,.96);display:none;padding:10px;}
+  .navlinks.open{display:flex;}
+  .navlinks a{padding:12px 16px;}
+  .navburger{display:flex;}
+  .navcta .btn-ghost{display:none;}
+}
+
+/* ---------- hero ---------- */
+.hero{padding:96px 0 64px;position:relative;}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr;}}
+.hero-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+.hero h1{font-size:clamp(36px,5.4vw,58px);line-height:1.05;margin-bottom:20px;}
+.hero h1 span{color:var(--purple-soft);}
+.hero p.lead{color:var(--ink-dim);font-size:17.5px;max-width:520px;margin-bottom:32px;}
+.hero-ctas{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:34px;}
+.hero-stats{display:flex;gap:34px;flex-wrap:wrap;}
+.hero-stats div b{display:block;font-family:var(--font-display);font-size:22px;color:var(--ink);}
+.hero-stats div span{font-size:12.5px;color:var(--ink-faint);}
+.hero-visual{position:relative;display:flex;align-items:center;justify-content:center;}
+.shield-hero{width:min(340px,78vw);filter:drop-shadow(0 0 50px rgba(168,85,247,.35));}
+.hero-visual::before{content:"";position:absolute;inset:-40px;background:radial-gradient(circle, rgba(168,85,247,.16), transparent 65%);z-index:-1;}
+
+/* ---------- generic grids/cards reused across pages ---------- */
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+@media(max-width:900px){.grid-3{grid-template-columns:repeat(2,1fr);}.grid-2{grid-template-columns:1fr;}}
+@media(max-width:600px){.grid-3{grid-template-columns:1fr;}}
+.fcard{padding:24px 22px;}
+.fcard .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.fcard .ic{font-size:20px;}
+.fcard h4{font-size:15.5px;margin-bottom:7px;}
+.fcard p{font-size:13.5px;color:var(--ink-dim);}
+
+.mockup{border-radius:16px;border:1px solid var(--line);background:linear-gradient(160deg, rgba(168,85,247,.08), rgba(94,234,212,.03));aspect-ratio:16/10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--ink-faint);text-align:center;padding:20px;position:relative;overflow:hidden;}
+.mockup::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg, transparent, rgba(255,255,255,.06), transparent);}
+.mockup .tag{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--purple-soft);}
+.mockup .titlebar{position:absolute;top:0;left:0;right:0;height:34px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;gap:6px;padding:0 14px;}
+.mockup .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.16);}
+
+.feature-row{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;margin-bottom:96px;}
+.feature-row.reverse{direction:rtl;}
+.feature-row.reverse > *{direction:ltr;}
+@media(max-width:880px){.feature-row{grid-template-columns:1fr;}.feature-row.reverse{direction:ltr;}}
+.feature-row h3{font-size:26px;margin:14px 0 12px;}
+.feature-row p{color:var(--ink-dim);font-size:15.5px;margin-bottom:18px;}
+.feature-row ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.feature-row li{font-size:14.5px;color:var(--ink-dim);display:flex;gap:10px;align-items:flex-start;}
+.feature-row li::before{content:"›";color:var(--purple-soft);font-weight:700;}
+
+.arch-list{display:flex;flex-direction:column;gap:2px;}
+.arch-item{display:grid;grid-template-columns:70px 1fr;gap:20px;padding:20px 22px;border-bottom:1px solid var(--line-soft);}
+.arch-item:last-child{border-bottom:none;}
+.arch-item .tag{font-family:var(--font-mono);font-size:11px;color:var(--purple-soft);align-self:start;padding-top:3px;}
+.arch-item h4{font-size:15.5px;margin-bottom:5px;}
+.arch-item p{color:var(--ink-dim);font-size:14px;}
+
+table{width:100%;border-collapse:collapse;}
+th,td{text-align:left;padding:14px 18px;font-size:13.5px;border-bottom:1px solid var(--line-soft);}
+th{font-family:var(--font-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);font-weight:500;}
+td.center,th.center{text-align:center;}
+tr:last-child td{border-bottom:none;}
+
+/* ---------- download page ---------- */
+.dl-hero{padding:38px 32px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:34px;}
+.dl-hero .left b{font-size:22px;font-family:var(--font-display);display:block;margin-bottom:6px;}
+.dl-hero .left span{color:var(--ink-dim);font-size:14px;}
+.versions-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.versions-head h3{font-size:18px;}
+.source-note{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-faint);}
+.version-list{display:flex;flex-direction:column;gap:14px;}
+.version-card{padding:22px 24px;}
+.version-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:8px;}
+.version-num{font-family:var(--font-mono);font-size:16px;color:var(--ink);display:flex;align-items:center;gap:10px;}
+.version-date{font-size:12.5px;color:var(--ink-faint);font-family:var(--font-mono);}
+.version-notes{color:var(--ink-dim);font-size:14px;margin-top:8px;}
+.version-notes ul{padding-left:18px;}
+.version-actions{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;}
+.empty-state{padding:40px;text-align:center;color:var(--ink-faint);font-size:14px;}
+.loading{padding:30px;text-align:center;color:var(--ink-faint);font-family:var(--font-mono);font-size:13px;}
+.gh-note{padding:20px 22px;display:flex;gap:14px;align-items:flex-start;margin-bottom:26px;}
+.gh-note .ic{font-size:20px;}
+.gh-note p{color:var(--ink-dim);font-size:13.5px;}
+.gh-note code{font-family:var(--font-mono);background:rgba(255,255,255,.06);padding:2px 7px;border-radius:6px;font-size:12.5px;}
+
+/* ---------- blog / guides ---------- */
+.post-card{padding:24px;display:flex;flex-direction:column;gap:10px;}
+.post-meta{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-faint);display:flex;gap:10px;align-items:center;}
+.post-card h4{font-size:17px;}
+.post-card p{color:var(--ink-dim);font-size:14px;}
+.post-tag{display:inline-flex;padding:4px 11px;border-radius:var(--radius-pill);background:rgba(168,85,247,.08);border:1px solid var(--line);color:var(--purple-soft);font-family:var(--font-mono);font-size:10.5px;width:fit-content;}
+
+/* ---------- github page ---------- */
+.gh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:30px;}
+@media(max-width:760px){.gh-stats{grid-template-columns:repeat(2,1fr);}}
+.gh-stat{padding:22px;text-align:center;}
+.gh-stat b{display:block;font-family:var(--font-display);font-size:26px;}
+.gh-stat span{font-size:12px;color:var(--ink-faint);font-family:var(--font-mono);}
+.code-block{background:#081410;border:1px solid var(--line-soft);border-radius:14px;padding:16px 18px;font-family:var(--font-mono);font-size:13px;color:var(--green-tint);overflow-x:auto;position:relative;}
+.copy-btn{position:absolute;top:10px;right:10px;}
+
+/* ---------- contact ---------- */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;}
+@media(max-width:860px){.contact-grid{grid-template-columns:1fr;}}
+.contact-info .row{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--line-soft);}
+.contact-info .row:last-child{border-bottom:none;}
+.contact-info .row .ic{font-size:18px;}
+.contact-info .row h5{font-size:14.5px;margin-bottom:3px;}
+.contact-info .row p,.contact-info .row a{font-size:13.5px;color:var(--ink-dim);}
+label{font-size:12px;color:var(--ink-faint);display:block;margin-bottom:6px;font-family:var(--font-mono);}
+input[type=text],input[type=email],input[type=password],input[type=url],textarea{
+  width:100%;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+  border:1px solid var(--line-soft);border-radius:14px;padding:12px 14px;color:var(--ink);
+  font-family:var(--font-body);font-size:14px;outline:none;transition:.15s;
+}
+input:focus,textarea:focus{border-color:var(--purple);background:rgba(168,85,247,.05);}
+textarea{resize:vertical;min-height:110px;}
+.form-row{margin-bottom:14px;}
+.form-msg{font-size:12.5px;color:var(--green-tint);font-family:var(--font-mono);}
+.msg-preview{margin-top:20px;padding-top:20px;border-top:1px solid var(--line-soft);}
+.msg-preview-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.msg-preview-head span{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;}
+.msg-preview pre{white-space:pre-wrap;word-break:break-word;background:rgba(0,0,0,.22);border:1px solid var(--line-soft);border-radius:12px;padding:14px 16px;font-family:var(--font-body);font-size:13.5px;color:var(--ink-dim);max-height:220px;overflow-y:auto;}
+.msg-preview-hint{font-size:12px;color:var(--ink-faint);margin-top:10px;}
+.msg-preview-hint a{color:var(--purple-soft);}
+
+/* ---------- roadmap ---------- */
+.roadmap-list{display:flex;flex-direction:column;gap:2px;}
+.roadmap-item{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line-soft);}
+.roadmap-item:last-child{border-bottom:none;}
+.roadmap-item h4{font-size:15px;}
+.roadmap-item p{font-size:13px;color:var(--ink-dim);margin-top:4px;}
+
+/* ---------- footer ---------- */
+.cta-final{padding:64px 40px;text-align:center;position:relative;overflow:hidden;}
+.cta-final h2{font-size:clamp(26px,4vw,36px);margin-bottom:14px;}
+.cta-final p{color:var(--ink-dim);margin-bottom:28px;}
+.cta-final-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+footer{border-top:1px solid var(--line-soft);padding:50px 0 30px;margin-top:20px;}
+.foot-grid{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:32px;margin-bottom:40px;}
+@media(max-width:760px){.foot-grid{grid-template-columns:1fr 1fr;}}
+.foot-brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;margin-bottom:10px;}
+.foot-brand .shield-mark{width:22px;height:22px;}
+.foot-col h5{font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;font-family:var(--font-mono);}
+.foot-col a,.foot-col button{display:block;font-size:13.5px;color:var(--ink-dim);margin-bottom:10px;background:none;border:none;cursor:pointer;text-align:left;font-family:var(--font-body);padding:0;}
+.foot-col a:hover,.foot-col button:hover{color:var(--purple-soft);}
+.foot-bottom{font-size:12.5px;color:var(--ink-faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+
+::selection{background:var(--purple);color:#fff;}
+
+/* ============================================================
+   SCROLL DRIFT — boxes separate when out of view, converge when
+   scrolled near. Applied selectively via data-drift attribute.
+   ============================================================ */
+[data-drift]{transition:transform 1s cubic-bezier(.16,.8,.24,1), opacity .9s ease;will-change:transform,opacity;}
+[data-drift="left"]{transform:translateX(-70px) rotate(-2deg);opacity:0;}
+[data-drift="right"]{transform:translateX(70px) rotate(2deg);opacity:0;}
+[data-drift="up"]{transform:translateY(60px) scale(.92);opacity:0;}
+[data-drift="down"]{transform:translateY(-50px) scale(.94);opacity:0;}
+[data-drift="out"]{transform:scale(.85);opacity:0;}
+[data-drift].in-view{transform:translate(0,0) rotate(0) scale(1) !important;opacity:1 !important;}
+@media (prefers-reduced-motion: reduce){
+  [data-drift]{transition:none;transform:none !important;opacity:1 !important;}
+}
+
+/* ============================================================
+   FLOWING BINARY — a continuous strip of 1s and 0s drifting past,
+   used sparingly as a decorative accent, not everywhere.
+   ============================================================ */
+.binary-flow{position:relative;overflow:hidden;}
+.binary-flow .bstream{
+  position:absolute;left:0;right:0;bottom:0;height:22px;display:flex;white-space:nowrap;
+  font-family:var(--font-mono);font-size:12px;letter-spacing:.3em;color:var(--green-tint);
+  opacity:.28;pointer-events:none;user-select:none;
+}
+.binary-flow .bstream span{display:inline-block;padding-right:.3em;animation:binaryScroll 14s linear infinite;}
+.binary-flow .bstream span.b2{animation-delay:-7s;}
+@keyframes binaryScroll{from{transform:translateX(0);}to{transform:translateX(-100%);}}
+.binary-flow.top .bstream{bottom:auto;top:0;}
+@media (prefers-reduced-motion: reduce){
+  .binary-flow .bstream span{animation:none;}
+}
+
+/* ============================================================
+   SHINE TITLES — glassy shimmer sweep + soft glow, for a few
+   selected headlines only.
+   ============================================================ */
+.shine-text{
+  background:linear-gradient(100deg, var(--ink) 30%, var(--purple-soft) 45%, #ffffff 50%, var(--green-tint) 55%, var(--ink) 68%);
+  background-size:250% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 18px rgba(168,85,247,.35));
+  animation:shineSweep 6s ease-in-out infinite;
+}
+@keyframes shineSweep{
+  0%{background-position:200% 0;}
+  55%{background-position:-40% 0;}
+  100%{background-position:-40% 0;}
+}
+@media (prefers-reduced-motion: reduce){
+  .shine-text{animation:none;background-position:0 0;}
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3.2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="shieldClip"><path d="M50 4 L92 18 V50 C92 76 74 92 50 98 C26 92 8 76 8 50 V18 Z"/></clipPath>
+  </defs>
+</svg>
+
+<header>
+  <nav aria-label="Primary">
+    <a href="#/home" class="brand">
+      <svg class="shield-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" id="navShield" aria-hidden="true"></svg>
+      Seinco
+    </a>
+    <button class="navburger" id="navBurger" aria-label="Toggle navigation menu" aria-expanded="false">☰</button>
+    <div class="navlinks" id="navLinks">
+      <a href="#/home" data-page="home">Home</a>
+      <a href="#/features" data-page="features">Features</a>
+      <a href="#/download" data-page="download">Download</a>
+      <a href="#/blog" data-page="blog">Blog</a>
+      <a href="#/guides" data-page="guides">Guides</a>
+      <a href="#/github" data-page="github">GitHub</a>
+      <a href="#/contact" data-page="contact">Contact</a>
+    </div>
+    <div class="navcta">
+      <a href="#/download" class="btn btn-ghost btn-sm">Version history</a>
+      <a href="#/download" class="btn btn-primary btn-sm">Download</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+
+  <!-- ================= HOME ================= -->
+  <section class="page" id="page-home">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="hero-badges">
+            <span class="pill live">● Actively developed</span>
+            <span class="pill" id="heroVersionPill">v0.8.0</span>
+          </div>
+          <h1><span class="shine-text">An AI-powered security</span><br>companion <span>you actually control.</span></h1>
+          <p class="lead">Seinco watches your system, explains what it finds in plain language, and never automates anything risky without your say-so. Monitoring, security scoring, and an AI assistant — in one desktop app.</p>
+          <div class="hero-ctas">
+            <a href="#/download" class="btn btn-primary">Download for Windows</a>
+            <a href="#/features" class="btn btn-ghost">See what it does</a>
+          </div>
+          <div class="hero-stats">
+            <div><b>4</b><span>Confirmation gates on risky actions</span></div>
+            <div><b>100%</b><span>Local document &amp; code processing</span></div>
+            <div><b>0</b><span>Silent automations</span></div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <svg class="shield-hero" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" id="heroShield" aria-hidden="true"></svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">The problem</div>
+          <h2>Security tools that don't talk to each other</h2>
+          <p>Monitoring lives in one app, scanning in another, AI chat in a browser tab, automation in a script you wrote once and forgot about. Nothing shares context, explains itself, or asks before it acts.</p>
+        </div>
+        <div class="grid-2">
+          <div class="panel fcard" data-drift="left"><div class="ic">🧩</div><h4>Fragmented tooling</h4><p>Separate apps for monitoring, AV status, and chatting with an AI about what it all means.</p></div>
+          <div class="panel fcard" data-drift="right"><div class="ic">🕳️</div><h4>Black-box scores</h4><p>A "security score" with no explanation of what moved it or why it matters.</p></div>
+          <div class="panel fcard" data-drift="left"><div class="ic">⚠️</div><h4>Silent automation</h4><p>Scripts and agents that act on your machine without a clear moment of approval.</p></div>
+          <div class="panel fcard" data-drift="right"><div class="ic">☁️</div><h4>Everything leaves your machine</h4><p>Documents and code routed through the cloud by default, whether you needed that or not.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">What Seinco is</div>
+          <h2 class="shine-text">One companion. Three commitments.</h2>
+        </div>
+        <div class="grid-3">
+          <div class="metal-ring" data-drift="left"><div class="panel fcard" style="padding:28px 24px;">
+            <span class="pill live">01 · Monitoring</span>
+            <h4 style="font-size:18px;margin-top:12px;">Real-time visibility</h4>
+            <p>CPU, RAM, disks, network, processes, and an explainable security score — updated live.</p>
+          </div></div>
+          <div class="metal-ring" data-drift="up"><div class="panel fcard" style="padding:28px 24px;">
+            <span class="pill live">02 · Assistant</span>
+            <h4 style="font-size:18px;margin-top:12px;">Talk or type</h4>
+            <p>One merged conversation for chat and voice, offline by default.</p>
+          </div></div>
+          <div class="metal-ring" data-drift="right"><div class="panel fcard" style="padding:28px 24px;">
+            <span class="pill live">03 · Automation</span>
+            <h4 style="font-size:18px;margin-top:12px;">Only with approval</h4>
+            <p>Anything with real-world effect passes through a permission gate first.</p>
+          </div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap" style="padding-bottom:40px;">
+      <div class="metal-ring" data-drift="out"><div class="panel cta-final binary-flow">
+        <svg width="46" height="46" viewBox="0 0 100 100" style="margin:0 auto 18px;" id="ctaShieldHome" aria-hidden="true"></svg>
+        <h2 class="shine-text">Ready to see it running?</h2>
+        <p>Grab the latest build or read through everything it does first.</p>
+        <div class="cta-final-btns">
+          <a href="#/download" class="btn btn-primary">Download now</a>
+          <a href="#/features" class="btn btn-ghost">Explore features</a>
+        </div>
+        <div class="bstream" aria-hidden="true"><span class="b1"></span><span class="b2"></span></div>
+      </div></div>
+    </section>
+  </section>
+
+  <!-- ================= FEATURES ================= -->
+  <section class="page" id="page-features">
+    <section class="section" style="padding-top:56px;">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">Features</div>
+          <h2>What Seinco actually does today</h2>
+          <p>Real, working features — clearly separated from anything still on the roadmap.</p>
+        </div>
+
+        <div class="feature-row">
+          <div><div class="mockup binary-flow" style="padding:0;">
+            <div class="titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            <svg viewBox="0 0 400 230" role="img" aria-label="Illustrative preview: circular usage gauges and an activity sparkline, not an actual screenshot" style="width:82%;margin-top:14px;">
+              <defs>
+                <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a855f7"/><stop offset="1" stop-color="#5eead4"/></linearGradient>
+              </defs>
+              <g font-family="JetBrains Mono, monospace" fill="#9fb3a8" font-size="10">
+                <g transform="translate(45,70)">
+                  <circle r="34" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="7"/>
+                  <circle r="34" fill="none" stroke="url(#gA)" stroke-width="7" stroke-linecap="round" stroke-dasharray="163 214" transform="rotate(-90)"/>
+                  <text text-anchor="middle" dy="5" fill="#eafff2" font-size="13" font-weight="600">42%</text>
+                  <text text-anchor="middle" dy="52" fill="#9fb3a8">CPU</text>
+                </g>
+                <g transform="translate(150,70)">
+                  <circle r="34" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="7"/>
+                  <circle r="34" fill="none" stroke="url(#gA)" stroke-width="7" stroke-linecap="round" stroke-dasharray="120 214" transform="rotate(-90)"/>
+                  <text text-anchor="middle" dy="5" fill="#eafff2" font-size="13" font-weight="600">31%</text>
+                  <text text-anchor="middle" dy="52" fill="#9fb3a8">RAM</text>
+                </g>
+                <g transform="translate(255,70)">
+                  <circle r="34" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="7"/>
+                  <circle r="34" fill="none" stroke="url(#gA)" stroke-width="7" stroke-linecap="round" stroke-dasharray="90 214" transform="rotate(-90)"/>
+                  <text text-anchor="middle" dy="5" fill="#eafff2" font-size="13" font-weight="600">58%</text>
+                  <text text-anchor="middle" dy="52" fill="#9fb3a8">DISK</text>
+                </g>
+                <g transform="translate(345,70)">
+                  <circle r="30" fill="rgba(94,234,212,.08)" stroke="#5eead4" stroke-width="2"/>
+                  <text text-anchor="middle" dy="4" fill="#5eead4" font-size="14" font-weight="700">A+</text>
+                </g>
+              </g>
+              <g transform="translate(30,150)">
+                <rect x="0" y="16" width="7" height="18" rx="2" fill="rgba(168,85,247,.5)"/>
+                <rect x="14" y="6" width="7" height="28" rx="2" fill="rgba(168,85,247,.65)"/>
+                <rect x="28" y="20" width="7" height="14" rx="2" fill="rgba(168,85,247,.4)"/>
+                <rect x="42" y="2" width="7" height="32" rx="2" fill="rgba(94,234,212,.6)"/>
+                <rect x="56" y="12" width="7" height="22" rx="2" fill="rgba(168,85,247,.5)"/>
+                <rect x="70" y="18" width="7" height="16" rx="2" fill="rgba(168,85,247,.4)"/>
+                <rect x="84" y="8" width="7" height="26" rx="2" fill="rgba(94,234,212,.55)"/>
+                <rect x="98" y="14" width="7" height="20" rx="2" fill="rgba(168,85,247,.5)"/>
+                <text x="120" y="26" fill="#6b8177" font-size="10">recent activity</text>
+              </g>
+            </svg>
+            <div class="tag" style="margin-top:10px;">Illustrative preview — not an actual screenshot</div>
+            <div class="bstream" aria-hidden="true"><span class="b1"></span><span class="b2"></span></div>
+          </div></div>
+          <div><span class="pill live">Live today</span><h3>The dashboard you open first</h3><p>Everything you need to know about your machine's health and security posture, in one glance.</p>
+            <ul><li>CPU, RAM, and disk usage at a glance</li><li>Security score front and center</li><li>Recent activity feed, plain-language entries</li></ul>
+          </div>
+        </div>
+
+        <div class="feature-row reverse">
+          <div><div class="mockup" style="padding:0;">
+            <div class="titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            <svg viewBox="0 0 400 230" role="img" aria-label="Illustrative preview: a shield score gauge with a short checklist, not an actual screenshot" style="width:78%;margin-top:12px;">
+              <defs>
+                <linearGradient id="gB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a855f7"/><stop offset="1" stop-color="#5eead4"/></linearGradient>
+              </defs>
+              <g transform="translate(90,95)">
+                <circle r="58" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/>
+                <circle r="58" fill="none" stroke="url(#gB)" stroke-width="9" stroke-linecap="round" stroke-dasharray="304 365" transform="rotate(-90)"/>
+                <path d="M0 -26 L20 -18 V0 C20 16 10 26 0 30 C-10 26 -20 16 -20 0 V-18 Z" fill="#081410" stroke="#a855f7" stroke-width="1.6" transform="scale(.9)"/>
+                <text text-anchor="middle" dy="46" fill="#eafff2" font-family="Space Grotesk, sans-serif" font-size="15" font-weight="700">83</text>
+              </g>
+              <g font-family="JetBrains Mono, monospace" font-size="10.5" fill="#9fb3a8" transform="translate(210,50)">
+                <g transform="translate(0,0)"><circle r="4" cx="0" cy="0" fill="#5eead4"/><text x="12" y="4">Firewall — active</text></g>
+                <g transform="translate(0,32)"><circle r="4" cx="0" cy="0" fill="#5eead4"/><text x="12" y="4">Antivirus — up to date</text></g>
+                <g transform="translate(0,64)"><circle r="4" cx="0" cy="0" fill="#a855f7"/><text x="12" y="4">Open ports — 2 flagged</text></g>
+                <g transform="translate(0,96)"><circle r="4" cx="0" cy="0" fill="#5eead4"/><text x="12" y="4">Processes — reviewed</text></g>
+              </g>
+            </svg>
+            <div class="tag" style="margin-top:10px;">Illustrative preview — not an actual screenshot</div>
+          </div></div>
+          <div><span class="pill live">Live today</span><h3>Security, transparently</h3><p>The Security Score checks firewall status, antivirus state, open ports, and flagged processes — every point is explained, never just a number.</p>
+            <ul><li>Explainable scoring, not a black box</li><li>High-risk actions need explicit confirmation</li><li>Plain-language flags, not overclaimed "threat detection"</li></ul>
+          </div>
+        </div>
+
+        <div class="feature-row">
+          <div><div class="mockup binary-flow" style="padding:0;">
+            <div class="titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            <svg viewBox="0 0 400 230" role="img" aria-label="Illustrative preview: a voice orb beside abstract chat bubbles, not an actual screenshot" style="width:80%;margin-top:10px;">
+              <defs>
+                <radialGradient id="gOrb"><stop offset="0" stop-color="#c084fc"/><stop offset="55%" stop-color="#a855f7" stop-opacity=".6"/><stop offset="100%" stop-color="#5eead4" stop-opacity="0"/></radialGradient>
+              </defs>
+              <g transform="translate(85,105)">
+                <circle r="60" fill="url(#gOrb)" opacity=".55"/>
+                <circle r="40" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1.4"/>
+                <g stroke="#eafff2" stroke-width="2.4" stroke-linecap="round" opacity=".85">
+                  <line x1="-24" y1="4" x2="-24" y2="-4"/>
+                  <line x1="-14" y1="10" x2="-14" y2="-10"/>
+                  <line x1="-4" y1="16" x2="-4" y2="-16"/>
+                  <line x1="6" y1="8" x2="6" y2="-8"/>
+                  <line x1="16" y1="14" x2="16" y2="-14"/>
+                  <line x1="26" y1="5" x2="26" y2="-5"/>
+                </g>
+              </g>
+              <g transform="translate(200,50)">
+                <rect x="0" y="0" width="150" height="46" rx="20" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.14)"/>
+                <line x1="22" y1="18" x2="110" y2="18" stroke="#9fb3a8" stroke-width="3" stroke-linecap="round"/>
+                <line x1="22" y1="30" x2="80" y2="30" stroke="#9fb3a8" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+              </g>
+              <g transform="translate(230,110)">
+                <rect x="0" y="0" width="150" height="46" rx="20" fill="rgba(168,85,247,.18)" stroke="rgba(168,85,247,.4)"/>
+                <line x1="22" y1="18" x2="120" y2="18" stroke="#eafff2" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+                <line x1="22" y1="30" x2="90" y2="30" stroke="#eafff2" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+              </g>
+              <g transform="translate(205,170)">
+                <rect x="0" y="0" width="130" height="40" rx="20" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.14)"/>
+                <line x1="20" y1="16" x2="95" y2="16" stroke="#9fb3a8" stroke-width="3" stroke-linecap="round"/>
+                <line x1="20" y1="26" x2="65" y2="26" stroke="#9fb3a8" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+              </g>
+            </svg>
+            <div class="tag" style="margin-top:8px;">Illustrative preview — not an actual screenshot</div>
+            <div class="bstream" aria-hidden="true"><span class="b1"></span><span class="b2"></span></div>
+          </div></div>
+          <div><span class="pill live">Live today</span><h3>Chat and voice, merged</h3><p>One conversation, type or speak. Works offline out of the box with a local model, or connect a hosted one.</p>
+            <ul><li>Pluggable AI backend — local-first</li><li>Natural phrasing: "cpu" and "what's my cpu usage" both work</li><li>Chainable commands, e.g. "cpu and then security score"</li></ul>
+          </div>
+        </div>
+
+        <div class="section-head" style="margin-top:10px;">
+          <div class="eyebrow">More of what's built</div>
+          <h2>Full capability set</h2>
+        </div>
+        <div class="grid-3">
+          <div class="panel fcard"><div class="top"><span class="ic">🖥️</span><span class="pill live">Live</span></div><h4>Full-device monitoring</h4><p>CPU, RAM, every disk/partition, every network interface, and running processes with plain-language flags.</p></div>
+          <div class="panel fcard"><div class="top"><span class="ic">🌐</span><span class="pill live">Live</span></div><h4>Browser automation</h4><p>Open, search, and fetch web pages, then summarize them locally — without leaving the app.</p></div>
+          <div class="panel fcard"><div class="top"><span class="ic">💻</span><span class="pill live">Live</span></div><h4>Coding assistant</h4><p>Explain, generate, and debug code via AI. Run Python snippets in a sandboxed, permission-gated subprocess.</p></div>
+          <div class="panel fcard"><div class="top"><span class="ic">📄</span><span class="pill live">Live</span></div><h4>Document intelligence</h4><p>Summarize and search PDFs, Word docs, text files, and CSVs. Fully local extraction — nothing uploaded.</p></div>
+          <div class="panel fcard"><div class="top"><span class="ic">🛰️</span><span class="pill live">Live</span></div><h4>Threat intel feeds</h4><p>CVE lookups with no API key required, plus optional hash/IP reputation via VirusTotal and AbuseIPDB.</p></div>
+          <div class="panel fcard"><div class="top"><span class="ic">🧩</span><span class="pill live">Live</span></div><h4>Plugin system</h4><p>A grouped, retractable sidebar and a modular architecture built to extend without touching the core.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0;">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">Built to extend</div>
+          <h2>A modular architecture, on purpose</h2>
+          <p>Core, monitoring, security, AI, automation, and UI are cleanly separated — new capability slots in without destabilizing what already works.</p>
+        </div>
+        <div class="panel arch-list">
+          <div class="arch-item"><span class="tag">core</span><div><h4>Core</h4><p>App lifecycle, configuration, permission gate, and the plugin registry.</p></div></div>
+          <div class="arch-item"><span class="tag">monitor</span><div><h4>Monitoring</h4><p>System telemetry — CPU, RAM, disk, network interfaces, process list — sampled continuously.</p></div></div>
+          <div class="arch-item"><span class="tag">security</span><div><h4>Security</h4><p>Security Score engine, threat intel lookups, plain-language flagging.</p></div></div>
+          <div class="arch-item"><span class="tag">ai</span><div><h4>AI</h4><p>Pluggable backend for chat, voice, coding assistance, and document intelligence.</p></div></div>
+          <div class="arch-item"><span class="tag">automation</span><div><h4>Automation</h4><p>Browser and code-execution actions, routed through explicit confirmation.</p></div></div>
+          <div class="arch-item"><span class="tag">ui</span><div><h4>UI</h4><p>The glass-panel desktop shell, grouped sidebar, and everything you see and click.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0;">
+      <div class="wrap">
+        <div class="section-head"><div class="eyebrow">Runtime</div><h2>Runs like a real app, because it is one</h2></div>
+        <div class="grid-3">
+          <div class="panel fcard"><div class="top"><span class="ic">📦</span></div><h4>Standalone .exe</h4><p>No terminal required to launch or keep it running.</p></div>
+          <div class="panel fcard"><div class="top"><span class="ic">⌨️</span></div><h4>Global hotkey</h4><p>A desktop shortcut plus a system-wide keyboard hotkey to summon it instantly.</p></div>
+          <div class="panel fcard"><div class="top"><span class="ic">🔁</span></div><h4>Keeps running</h4><p>Stays alive even if the terminal that launched it gets closed.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0;">
+      <div class="wrap">
+        <div class="section-head"><div class="eyebrow">Where it fits</div><h2>Complement, not a replacement</h2><p>Seinco adds visibility and an assistant on top of what you already run — it isn't trying to be your antivirus.</p></div>
+        <div class="panel" style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Capability</th><th class="center">Seinco</th></tr></thead>
+            <tbody>
+              <tr><td>Full-device monitoring</td><td class="center">✔</td></tr>
+              <tr><td>Explainable security score</td><td class="center">✔</td></tr>
+              <tr><td>Local-first AI chat &amp; voice</td><td class="center">✔</td></tr>
+              <tr><td>Permission-gated automation</td><td class="center">✔</td></tr>
+              <tr><td>Document intelligence, local</td><td class="center">✔</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:0;">
+      <div class="wrap">
+        <div class="section-head"><div class="eyebrow">Honest roadmap</div><h2>Built solid, growing deliberately</h2></div>
+        <div class="panel roadmap-list">
+          <div class="roadmap-item"><div><h4>MITRE ATT&amp;CK mapping</h4><p>Map flagged activity to known techniques for deeper context.</p></div><span class="pill roadmap">Roadmap</span></div>
+          <div class="roadmap-item"><div><h4>OTX integration</h4><p>Additional open threat-intel source alongside CVE, VirusTotal, and AbuseIPDB.</p></div><span class="pill roadmap">Roadmap</span></div>
+          <div class="roadmap-item"><div><h4>True OS-level acrylic blur</h4><p>Native Windows acrylic instead of an approximated glass effect.</p></div><span class="pill roadmap">Roadmap</span></div>
+          <div class="roadmap-item"><div><h4>Deeper AI backend integration</h4><p>Tighter tool-use between the assistant and the monitoring/security modules.</p></div><span class="pill roadmap">Roadmap</span></div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ================= DOWNLOAD ================= -->
+  <section class="page" id="page-download">
+    <section class="section" style="padding-top:56px;">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">Get it</div>
+          <h2 class="shine-text">Download &amp; version history</h2>
+          <p>Every release comes straight from GitHub Releases — nothing here is added or removed by hand, and the list only ever grows.</p>
+        </div>
+
+        <div class="metal-ring" data-drift="up"><div class="panel dl-hero binary-flow top">
+          <div class="left">
+            <b id="latestVersionLabel">Loading latest version…</b>
+            <span id="latestVersionMeta">Checking for releases</span>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a href="#" id="latestDownloadBtn" class="btn btn-primary">Download latest</a>
+            <a href="#allVersions" class="btn btn-ghost">Full history ↓</a>
+          </div>
+          <div class="bstream" aria-hidden="true"><span class="b1"></span><span class="b2"></span></div>
+        </div></div>
+
+        <div class="panel gh-note" style="margin-top:26px;">
+          <span class="ic">🐙</span>
+          <p>Version history is sourced entirely from GitHub Releases. To ship a new version, publish a GitHub release with the installer attached as an asset — it appears here automatically. There's no upload control on this page itself.</p>
+        </div>
+
+        <div id="allVersions">
+          <div class="versions-head">
+            <h3>All versions</h3>
+            <span class="source-note" id="sourceNote">source: —</span>
+          </div>
+          <div class="version-list" id="versionList">
+            <div class="loading">Loading version history…</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ================= BLOG ================= -->
+  <section class="page" id="page-blog">
+    <section class="section" style="padding-top:56px;">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">Blog</div>
+          <h2>Notes from building Seinco</h2>
+          <p>Build logs, design decisions, and the occasional postmortem.</p>
+        </div>
+        <div class="grid-3" id="blogGrid"></div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ================= GUIDES ================= -->
+  <section class="page" id="page-guides">
+    <section class="section" style="padding-top:56px;">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">Guides</div>
+          <h2>Get the most out of Seinco</h2>
+          <p>Setup, configuration, and how the permission gate actually works.</p>
+        </div>
+        <div class="grid-3" id="guidesGrid"></div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ================= GITHUB ================= -->
+  <section class="page" id="page-github">
+    <section class="section" style="padding-top:56px;">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">Open source</div>
+          <h2 class="shine-text">Seinco on GitHub</h2>
+          <p id="ghRepoLabel">Configure GITHUB_REPO in the page source to pull live repo stats here.</p>
+        </div>
+        <div class="gh-stats">
+          <div class="panel gh-stat" data-drift="left"><b id="ghStars">—</b><span>Stars</span></div>
+          <div class="panel gh-stat" data-drift="up"><b id="ghForks">—</b><span>Forks</span></div>
+          <div class="panel gh-stat" data-drift="up"><b id="ghIssues">—</b><span>Open issues</span></div>
+          <div class="panel gh-stat" data-drift="right"><b id="ghLang">—</b><span>Primary language</span></div>
+        </div>
+        <p id="ghStatsStatus" style="color:var(--ink-faint);font-size:12.5px;margin:-14px 0 26px;"></p>
+        <div class="metal-ring" style="margin-bottom:24px;"><div class="panel" style="padding:26px;">
+          <h4 style="margin-bottom:14px;font-size:16px;">Clone it</h4>
+          <div class="code-block" id="cloneBlock">git clone https://github.com/your-org/your-repo.git
+            <button class="btn btn-ghost btn-sm copy-btn" id="copyCloneBtn" type="button">Copy</button>
+          </div>
+        </div></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="#" id="ghRepoLink" class="btn btn-primary" target="_blank" rel="noopener">View repository</a>
+          <a href="#" id="ghIssuesLink" class="btn btn-ghost" target="_blank" rel="noopener">Report an issue</a>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ================= CONTACT ================= -->
+  <section class="page" id="page-contact">
+    <section class="section" style="padding-top:56px;">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">Contact</div>
+          <h2>Get in touch</h2>
+          <p>Questions, feedback, or a bug that needs squashing — reach out.</p>
+        </div>
+        <div class="contact-grid">
+          <div class="panel contact-info" style="padding:26px;">
+            <div class="row"><span class="ic">✉️</span><div><h5>Email</h5><a href="mailto:rajkamaljadapalli@gmail.com">rajkamaljadapalli@gmail.com</a></div></div>
+            <div class="row"><span class="ic">🐙</span><div><h5>GitHub</h5><a href="https://github.com/Raju-565613" target="_blank" rel="noopener">github.com/Raju-565613</a></div></div>
+            <div class="row"><span class="ic">💬</span><div><h5>Response time</h5><p>Usually within a couple of days.</p></div></div>
+          </div>
+          <div class="metal-ring"><div class="panel" style="padding:26px;">
+            <form id="contactForm">
+              <div class="form-row"><label for="cName">Name</label><input type="text" id="cName" required></div>
+              <div class="form-row"><label for="cEmail">Email</label><input type="email" id="cEmail" required></div>
+              <div class="form-row"><label for="cMsg">Message</label><textarea id="cMsg" required></textarea></div>
+              <button type="submit" class="btn btn-primary">Send message</button>
+              <span class="form-msg" id="contactMsg" style="margin-left:10px;"></span>
+            </form>
+            <div class="msg-preview" id="contactPreviewBox" style="display:none;">
+              <div class="msg-preview-head"><span>Your message</span><button type="button" class="btn btn-ghost btn-sm" id="contactCopyBtn">Copy</button></div>
+              <pre id="contactPreviewText"></pre>
+              <p class="msg-preview-hint" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <a href="#" id="contactMailBtn" class="btn btn-ghost btn-sm">Send by email instead</a>
+                <span>in case the automatic send doesn't go through.</span>
+              </p>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="section-head" style="margin-top:56px;">
+          <div class="eyebrow">Found a bug?</div>
+          <h3 style="font-family:var(--font-display);font-size:22px;">Report an issue</h3>
+          <p>Send it straight to GitHub Issues, or email it — either way, the exact report stays visible below so you can copy it.</p>
+        </div>
+        <div class="metal-ring"><div class="panel" style="padding:26px;">
+          <form id="reportForm">
+            <div class="form-row"><label for="rTitle">Short summary</label><input type="text" id="rTitle" placeholder="e.g. Security score doesn't refresh after scan" required></div>
+            <div class="form-row"><label for="rSteps">What happened / steps to reproduce</label><textarea id="rSteps" placeholder="What you expected, what actually happened, and how to reproduce it." required></textarea></div>
+            <div class="form-actions" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+              <button type="submit" class="btn btn-primary">Prepare report</button>
+              <a href="#" id="reportGithubLink" class="btn btn-ghost" target="_blank" rel="noopener">Open a GitHub issue instead</a>
+              <span class="form-msg" id="reportMsg"></span>
+            </div>
+          </form>
+          <div class="msg-preview" id="reportPreviewBox" style="display:none;">
+            <div class="msg-preview-head"><span>Report preview</span><button type="button" class="btn btn-ghost btn-sm" id="reportCopyBtn">Copy</button></div>
+            <pre id="reportPreviewText"></pre>
+            <div class="msg-preview-hint" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+              <a href="#" id="reportMailBtn" class="btn btn-primary btn-sm">Email this report</a>
+              <span>or copy it into a new GitHub issue.</span>
+            </div>
+          </div>
+        </div></div>
+      </div>
+    </section>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand"><svg class="shield-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" id="footShield" aria-hidden="true"></svg>Seinco</div>
+        <p style="color:var(--ink-faint);font-size:13.5px;max-width:260px;">An AI-powered desktop security companion and endpoint monitoring assistant. Always asking before it acts.</p>
+      </div>
+      <div class="foot-col"><h5>Product</h5><a href="#/features">Features</a><a href="#/download">Download</a><a href="#/guides">Guides</a></div>
+      <div class="foot-col"><h5>Community</h5><a href="#/blog">Blog</a><a href="#/github">GitHub</a><a href="#/contact">Contact</a></div>
+      <div class="foot-col"><h5>Project</h5><a href="#/home">Home</a><a href="#/download">Version history</a></div>
+    </div>
+    <div class="foot-bottom">
+      <span>© <span id="year"></span> Seinco. Built solid, growing deliberately.</span>
+      <span id="footVersionTag" class="pill">v0.8.0</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   SHIELD LOGO
+   ============================================================ */
+function buildShield(){
+  const shieldPath = "M50 4 L92 18 V50 C92 76 74 92 50 98 C26 92 8 76 8 50 V18 Z";
+  const cols = 11, rows = 13;
+  const spacing = 88 / (rows - 1);
+  const period = rows * spacing; // one full loop length, in the same user units as the viewBox
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let seed = 7;
+  function rnd(){ seed = (seed*9301+49297)%233280; return seed/233280; }
+  let colsMarkup = "";
+  for(let c=0;c<cols;c++){
+    const x = 8 + c*(84/(cols-1));
+    let rowsMarkup = "";
+    for(let r=0;r<rows;r++){
+      const y = 8 + r*spacing;
+      const bit = rnd() > 0.5 ? "1" : "0";
+      const op = (0.35 + rnd()*0.55).toFixed(2);
+      rowsMarkup += `<text x="${x}" y="${y.toFixed(2)}" font-family="JetBrains Mono, monospace" font-size="7" fill="#5eead4" fill-opacity="${op}" text-anchor="middle">${bit}</text>`;
+    }
+    // three stacked copies of the same column so the loop is seamless
+    const stack = `<g transform="translate(0,${(-period).toFixed(2)})">${rowsMarkup}</g><g>${rowsMarkup}</g><g transform="translate(0,${period.toFixed(2)})">${rowsMarkup}</g>`;
+    const goingDown = c % 2 === 0; // adjacent columns move opposite directions
+    const dur = (5.5 + rnd()*3.5).toFixed(2) + "s";
+    const beginOffset = "-" + (rnd()*parseFloat(dur)).toFixed(2) + "s";
+    const anim = reduceMotion ? "" :
+      goingDown
+        ? `<animateTransform attributeName="transform" attributeType="XML" type="translate" from="0 0" to="0 ${period.toFixed(2)}" dur="${dur}" begin="${beginOffset}" repeatCount="indefinite"/>`
+        : `<animateTransform attributeName="transform" attributeType="XML" type="translate" from="0 0" to="0 ${(-period).toFixed(2)}" dur="${dur}" begin="${beginOffset}" repeatCount="indefinite"/>`;
+    colsMarkup += `<g>${stack}${anim}</g>`;
+  }
+  return `<g><path d="${shieldPath}" fill="#081410"/><g clip-path="url(#shieldClip)">${colsMarkup}</g><path d="${shieldPath}" fill="none" stroke="#a855f7" stroke-width="2.4" filter="url(#glow)"/></g>`;
+}
+["navShield","heroShield","footShield","ctaShieldHome"].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el){ el.innerHTML = buildShield(); }
+});
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ============================================================
+   FLOWING BINARY STREAMS — fill each .bstream with random bits
+   ============================================================ */
+function randomBits(n){
+  let s = "";
+  for(let i=0;i<n;i++) s += Math.random() > .5 ? "1" : "0";
+  return s.match(/.{1,4}/g).join(" ");
+}
+document.querySelectorAll('.bstream').forEach(stream=>{
+  const bits = randomBits(160);
+  const b1 = stream.querySelector('.b1');
+  const b2 = stream.querySelector('.b2');
+  if(b1) b1.textContent = bits;
+  if(b2) b2.textContent = bits;
+});
+
+/* ============================================================
+   SCROLL DRIFT — elements converge into place when scrolled near,
+   drift apart again once scrolled away, so re-entering re-triggers.
+   ============================================================ */
+if('IntersectionObserver' in window){
+  const driftObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      entry.target.classList.toggle('in-view', entry.isIntersecting);
+    });
+  }, {threshold:0.25, rootMargin:"-40px 0px -40px 0px"});
+  document.querySelectorAll('[data-drift]').forEach(el=>driftObserver.observe(el));
+}
+
+/* ============================================================
+   ROUTER — hash-based "pages"
+   ============================================================ */
+const PAGES = ['home','features','download','blog','guides','github','contact'];
+const TITLES = {home:'AI-Powered Security Companion',features:'Features',download:'Download',blog:'Blog',guides:'Guides',github:'GitHub',contact:'Contact'};
+function route(){
+  let hash = location.hash.replace('#/','').split('#')[0] || 'home';
+  if(!PAGES.includes(hash)) hash = 'home';
+  PAGES.forEach(p=>{
+    const el = document.getElementById('page-'+p);
+    if(el) el.classList.toggle('active', p===hash);
+  });
+  document.querySelectorAll('.navlinks a').forEach(a=>{
+    const match = a.dataset.page === hash;
+    a.classList.toggle('active', match);
+    if(match) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+  });
+  document.title = 'Seinco — ' + TITLES[hash];
+  window.scrollTo({top:0});
+  document.getElementById('navLinks').classList.remove('open');
+  navBurger.setAttribute('aria-expanded','false');
+}
+window.addEventListener('hashchange', route);
+window.addEventListener('DOMContentLoaded', route);
+
+const navBurger = document.getElementById('navBurger');
+navBurger.addEventListener('click', ()=>{
+  const open = document.getElementById('navLinks').classList.toggle('open');
+  navBurger.setAttribute('aria-expanded', open ? 'true' : 'false');
+});
+
+/* ============================================================
+   VERSION HISTORY — GitHub Releases only.
+   Set GITHUB_REPO to "owner/repo". Until it's set, the Download
+   page shows an empty state rather than fabricated data.
+   ============================================================ */
+const GITHUB_REPO = "Raju-565613/seinco"; // update the part after "/" to match your actual repo name
+
+/* ============================================================
+   CONTACT DELIVERY — where Contact/Report submissions actually
+   get emailed. Uses FormSubmit (https://formsubmit.co), a free
+   no-signup form-relay service: no backend or API key needed.
+   IMPORTANT ONE-TIME STEP: the very first submission from this
+   page triggers an activation email from FormSubmit to the
+   address below — you must open it and click "Activate" once,
+   or later submissions won't be delivered.
+   ============================================================ */
+const DEST_EMAIL = "rajkamaljadapalli@gmail.com";
+
+const versionListEl = document.getElementById('versionList');
+const sourceNoteEl = document.getElementById('sourceNote');
+const latestLabelEl = document.getElementById('latestVersionLabel');
+const latestMetaEl = document.getElementById('latestVersionMeta');
+const latestBtnEl = document.getElementById('latestDownloadBtn');
+const heroPillEl = document.getElementById('heroVersionPill');
+const footTagEl = document.getElementById('footVersionTag');
+
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent = s||""; return d.innerHTML; }
+function notesToHtml(notes){
+  if(!notes) return "";
+  const lines = notes.split("\n").filter(l=>l.trim().length);
+  const isList = lines.length && lines.every(l=>l.trim().startsWith("-") || l.trim().startsWith("*"));
+  if(isList) return "<ul>" + lines.map(l=>`<li>${escapeHtml(l.replace(/^[-*]\s*/,""))}</li>`).join("") + "</ul>";
+  return `<div>${escapeHtml(notes).replace(/\n/g,"<br>")}</div>`;
+}
+
+function renderVersions(list, sourceLabel){
+  sourceNoteEl.textContent = "source: " + sourceLabel;
+  if(!list.length){
+    versionListEl.innerHTML = `<div class="empty-state">No releases found yet. Set GITHUB_REPO in the page source once your first GitHub release is published.</div>`;
+    latestLabelEl.textContent = "No release yet";
+    latestMetaEl.textContent = GITHUB_REPO ? "Waiting on the first GitHub release" : "GITHUB_REPO not configured";
+    latestBtnEl.style.display = "none";
+    return;
+  }
+  versionListEl.innerHTML = list.map((v,i)=>`
+    <div class="panel version-card">
+      <div class="version-top">
+        <span class="version-num">${escapeHtml(v.version)} ${i===0?'<span class="pill live">Latest</span>':''}</span>
+        <span class="version-date">${escapeHtml(v.date||'')}</span>
+      </div>
+      <div class="version-notes">${notesToHtml(v.notes)}</div>
+      <div class="version-actions">
+        ${v.url ? `<a href="${v.url}" class="btn btn-primary btn-sm" target="_blank" rel="noopener">Download ${escapeHtml(v.version)}</a>` : `<span class="pill roadmap">No asset attached</span>`}
+        <a href="${v.releaseUrl||v.url||'#'}" class="btn btn-ghost btn-sm" target="_blank" rel="noopener">Release notes</a>
+      </div>
+    </div>
+  `).join("");
+  const latest = list[0];
+  latestLabelEl.textContent = "Seinco " + latest.version;
+  latestMetaEl.textContent = latest.date ? ("Released " + latest.date) : "Latest release";
+  if(latest.url){ latestBtnEl.href = latest.url; latestBtnEl.style.display = ""; }
+  else { latestBtnEl.style.display = "none"; }
+  heroPillEl.textContent = latest.version;
+  footTagEl.textContent = latest.version;
+}
+
+async function loadFromGitHub(repo){
+  const res = await fetch(`https://api.github.com/repos/${repo}/releases`);
+  if(!res.ok) throw new Error("GitHub API error " + res.status);
+  const data = await res.json();
+  return data.map(r=>({
+    version: r.tag_name || r.name || "unversioned",
+    date: (r.published_at||"").slice(0,10),
+    notes: r.body || "",
+    url: (r.assets && r.assets[0]) ? r.assets[0].browser_download_url : r.html_url,
+    releaseUrl: r.html_url
+  }));
+}
+
+async function initVersions(){
+  if(!GITHUB_REPO){ renderVersions([], "not configured"); return; }
+  try{
+    const list = await loadFromGitHub(GITHUB_REPO);
+    renderVersions(list, "GitHub releases · " + GITHUB_REPO);
+  }catch(e){
+    renderVersions([], "GitHub fetch failed");
+  }
+}
+initVersions();
+
+/* ============================================================
+   GITHUB PAGE — repo stats
+   ============================================================ */
+async function initGitHubPage(){
+  const repoLabel = document.getElementById('ghRepoLabel');
+  const repoLink = document.getElementById('ghRepoLink');
+  const issuesLink = document.getElementById('ghIssuesLink');
+  const cloneBlock = document.getElementById('cloneBlock');
+  const statusEl = document.getElementById('ghStatsStatus');
+  const statIds = ['ghStars','ghForks','ghIssues','ghLang'];
+
+  if(!GITHUB_REPO){
+    repoLabel.textContent = "Set GITHUB_REPO in the page source to pull live repo stats here.";
+    return;
+  }
+
+  repoLabel.textContent = "Live stats for " + GITHUB_REPO + ".";
+  repoLink.href = `https://github.com/${GITHUB_REPO}`;
+  issuesLink.href = `https://github.com/${GITHUB_REPO}/issues`;
+  cloneBlock.firstChild.textContent = `git clone https://github.com/${GITHUB_REPO}.git`;
+  statIds.forEach(id=>{ document.getElementById(id).textContent = '···'; });
+
+  try{
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`);
+    if(!res.ok) throw new Error("status " + res.status);
+    const data = await res.json();
+    animateCount('ghStars', data.stargazers_count ?? 0);
+    animateCount('ghForks', data.forks_count ?? 0);
+    animateCount('ghIssues', data.open_issues_count ?? 0);
+    document.getElementById('ghLang').textContent = data.language || '—';
+    statusEl.textContent = "";
+  }catch(e){
+    statIds.forEach(id=>{ document.getElementById(id).textContent = '—'; });
+    statusEl.textContent = `Couldn't load live stats for ${GITHUB_REPO} — the repo may not be public yet, or the name doesn't match. The links below still point to the right place.`;
+  }
+}
+function animateCount(id, target){
+  const el = document.getElementById(id);
+  const dur = 900, start = performance.now();
+  function step(now){
+    const t = Math.min(1, (now - start) / dur);
+    el.textContent = Math.round(target * (1 - Math.pow(1 - t, 3)));
+    if(t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+initGitHubPage();
+document.getElementById('copyCloneBtn').addEventListener('click', ()=>{
+  const text = GITHUB_REPO ? `git clone https://github.com/${GITHUB_REPO}.git` : 'git clone https://github.com/your-org/your-repo.git';
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById('copyCloneBtn');
+    const orig = btn.textContent; btn.textContent = 'Copied'; setTimeout(()=>btn.textContent = orig, 1500);
+  });
+});
+
+/* ============================================================
+   BLOG + GUIDES — static content owner edits by hand, no public UI
+   ============================================================ */
+const BLOG_POSTS = [
+  {title:"Why the Security Score explains itself", date:"2026-07-18", tag:"Design", excerpt:"A walk-through of how each check contributes to the score, and why we refused to ship a mystery number."},
+  {title:"Building the permission gate", date:"2026-06-30", tag:"Engineering", excerpt:"The confirmation flow behind every automation Seinco can run, and what triggers it."},
+  {title:"Local-first by default", date:"2026-06-10", tag:"Philosophy", excerpt:"Why documents and code never leave your machine unless you explicitly connect a hosted model."}
+];
+const GUIDES = [
+  {title:"Getting started", tag:"Setup", excerpt:"Install, launch, and run your first security scan in under three minutes."},
+  {title:"Understanding your Security Score", tag:"Security", excerpt:"What each check measures and how to raise your score safely."},
+  {title:"Setting the global hotkey", tag:"Configuration", excerpt:"Summon Seinco from anywhere on your desktop."},
+  {title:"Writing a plugin", tag:"Extending", excerpt:"How the plugin registry works and where to hook in."},
+  {title:"Using the coding assistant safely", tag:"AI", excerpt:"How the sandboxed subprocess and permission gate work together."},
+  {title:"Command language reference", tag:"Reference", excerpt:"Every phrasing pattern the assistant understands, with chaining examples."}
+];
+function renderCards(list, elId){
+  document.getElementById(elId).innerHTML = list.map(p=>`
+    <div class="panel post-card">
+      <span class="post-tag">${escapeHtml(p.tag)}</span>
+      <h4>${escapeHtml(p.title)}</h4>
+      <p>${escapeHtml(p.excerpt)}</p>
+      ${p.date ? `<div class="post-meta">${escapeHtml(p.date)}</div>` : ''}
+    </div>
+  `).join("");
+}
+renderCards(BLOG_POSTS, 'blogGrid');
+renderCards(GUIDES, 'guidesGrid');
+
+/* ============================================================
+   CONTACT FORM — sends to DEST_EMAIL via FormSubmit's AJAX
+   endpoint (no backend needed). The composed message is still
+   shown on the page, with a manual mailto button, as a fallback
+   if the send ever fails.
+   ============================================================ */
+function copyToClipboard(text, btn){
+  navigator.clipboard.writeText(text).then(()=>{
+    const orig = btn.textContent; btn.textContent = 'Copied'; setTimeout(()=>btn.textContent = orig, 1500);
+  });
+}
+async function sendViaFormSubmit(payload){
+  const res = await fetch(`https://formsubmit.co/ajax/${DEST_EMAIL}`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','Accept':'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok) throw new Error('send failed: ' + res.status);
+  return res.json();
+}
+
+document.getElementById('contactForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const name = document.getElementById('cName').value;
+  const email = document.getElementById('cEmail').value;
+  const msg = document.getElementById('cMsg').value;
+  const fullText = `From: ${name} (${email})\n\n${msg}`;
+  const statusEl = document.getElementById('contactMsg');
+  const mailBtn = document.getElementById('contactMailBtn');
+
+  document.getElementById('contactPreviewText').textContent = fullText;
+  document.getElementById('contactPreviewBox').style.display = 'block';
+  mailBtn.href = `mailto:${DEST_EMAIL}?subject=${encodeURIComponent('Message from '+name)}&body=${encodeURIComponent(fullText)}`;
+
+  statusEl.classList.remove('err');
+  statusEl.textContent = "Sending…";
+  try{
+    await sendViaFormSubmit({name, email, message: msg, _subject: `New message from ${name} — Seinco site`});
+    statusEl.textContent = "Sent to my inbox. Thanks!";
+  }catch(err){
+    statusEl.textContent = "Couldn't send automatically — copy the message below or use the email button.";
+    statusEl.classList.add('err');
+  }
+});
+document.getElementById('contactCopyBtn').addEventListener('click', (e)=>{
+  copyToClipboard(document.getElementById('contactPreviewText').textContent, e.target);
+});
+
+/* ============================================================
+   REPORT AN ISSUE — same delivery pattern as the contact form,
+   plus a direct link to open a pre-filled GitHub issue.
+   ============================================================ */
+function setupReportForm(){
+  const githubLinkEl = document.getElementById('reportGithubLink');
+  if(GITHUB_REPO){ githubLinkEl.href = `https://github.com/${GITHUB_REPO}/issues/new`; }
+
+  document.getElementById('reportForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const title = document.getElementById('rTitle').value;
+    const steps = document.getElementById('rSteps').value;
+    const fullText = `Title: ${title}\n\n${steps}`;
+    const statusEl = document.getElementById('reportMsg');
+
+    document.getElementById('reportPreviewText').textContent = fullText;
+    document.getElementById('reportPreviewBox').style.display = 'block';
+    document.getElementById('reportMailBtn').href = `mailto:${DEST_EMAIL}?subject=${encodeURIComponent('Bug report: '+title)}&body=${encodeURIComponent(fullText)}`;
+    if(GITHUB_REPO){
+      githubLinkEl.href = `https://github.com/${GITHUB_REPO}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(steps)}`;
+    }
+
+    statusEl.classList.remove('err');
+    statusEl.textContent = "Sending…";
+    try{
+      await sendViaFormSubmit({title, steps, _subject: `Bug report: ${title} — Seinco site`});
+      statusEl.textContent = "Sent to my inbox. Thanks for the report!";
+    }catch(err){
+      statusEl.textContent = "Couldn't send automatically — copy the report below or email it directly.";
+      statusEl.classList.add('err');
+    }
+    document.getElementById('reportPreviewBox').scrollIntoView({behavior:'smooth', block:'nearest'});
+  });
+  document.getElementById('reportCopyBtn').addEventListener('click', (e)=>{
+    copyToClipboard(document.getElementById('reportPreviewText').textContent, e.target);
+  });
+}
+setupReportForm();
+</script>
+</body>
+</html>
